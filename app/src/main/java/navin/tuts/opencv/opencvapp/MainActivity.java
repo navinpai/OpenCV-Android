@@ -28,6 +28,8 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
 
     // Static loading of OpenCV
     static {
+        System.loadLibrary("native-lib");
+
         if(!OpenCVLoader.initDebug()){
             Log.d(TAG, "OpenCV not loaded");
         } else {
@@ -74,12 +76,13 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         // This is where the magic happens. When we get a frame from the camera, we do the following:
-        //First, we convert it to grayscale and save it in mGray
+        // First, we convert it to grayscale and save it in mGray
         mGray = inputFrame.gray();
-        // Then we perform a Gaussian blur on mGray and save it in the mGauss
-        Imgproc.GaussianBlur(mGray, mGauss, new Size(), 5);
-        // Return the Gaussian-ed Mat back to screen
-        return mGauss;
+        // Return we pass mGray to a native method to do Canny Edge Detection on it
+        // The result is copied back to mGray itself
+        nativeCanny(mGray.getNativeObjAddr());
+        // Finally we retun mGray to the display
+        return mGray;
     }
 
     @Override
@@ -118,4 +121,6 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
             mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         }
     }
+
+    public static native boolean nativeCanny(long iAddr);
 }
