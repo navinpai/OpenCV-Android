@@ -49,3 +49,6 @@ captures/
 
 # Keystore files
 *.jks
+
+jniLibs/
+import-summary.txt
